@@ -5,7 +5,7 @@
   <title>Begriffe</title>
   <style>
     body {
-      background-color: #fff8e7; /* sanftes Beige */
+      background-color: #fff8e7;
       margin: 0;
       padding: 20px;
       height: 100vh;
@@ -23,15 +23,15 @@
       font-size: 28px;
       font-weight: normal;
       text-align: center;
-      margin: 5px 0 40px 0; /* Abstand nach unten */
+      margin: 5px 0 40px 0;
     }
     .term {
       position: absolute;
-      cursor: pointer;
+      cursor: pointer; /* Hand-Cursor */
       white-space: nowrap;
     }
     .translation {
-      opacity: 0.4; /* blass */
+      opacity: 0.4;
       margin-left: 8px;
     }
   </style>
@@ -67,6 +67,7 @@
   const colors = ["darkred","blue","green","purple","darkorange","brown","teal","crimson","navy","darkgreen","indigo","darkblue","maroon","olive","darkcyan","darkmagenta","darkslateblue","firebrick"];
 
   const placed = [];
+  let isPlaying = false; // Sperr-Flag
 
   function overlaps(x,y,w,h) {
     return placed.some(p => !(x+w < p.x || p.x+p.w < x || y+h < p.y || p.y+p.h < y));
@@ -76,48 +77,50 @@
     const div = document.createElement("div");
     div.className = "term";
 
-    // Schriftgröße
     const baseSize = 20 + Math.random()*12;
     div.style.fontSize = (baseSize*1.2) + "px";
-
-    // Schriftart & Farbe
     div.style.fontFamily = fonts[Math.floor(Math.random()*fonts.length)];
     div.style.color = colors[Math.floor(Math.random()*colors.length)];
-
-    // Inhalt
     div.innerHTML = word + "<span class='translation'>" + translation + "</span>";
-
     document.body.appendChild(div);
 
-    // Größe messen
     const rect = div.getBoundingClientRect();
     let w = rect.width;
     let h = rect.height;
 
-    // Zufällige Position suchen ohne Überlappung
     let x,y,tries=0;
-    const topMargin = 140; // Abstand zur Überschrift
-    const bottomMargin = 100; // Abstand zum unteren Rand
+    const topMargin = 140;
+    const bottomMargin = 100;
     do {
       x = Math.random()*(window.innerWidth - w);
       y = topMargin + Math.random()*(window.innerHeight - h - topMargin - bottomMargin);
       tries++;
-      if (tries>1000) break; // Notfall
+      if (tries>1000) break;
     } while(overlaps(x,y,w,h));
 
     div.style.left = x + "px";
     div.style.top = y + "px";
-
     placed.push({x,y,w,h});
 
-    // Klick-Audio
+    // Klick-Aktion
     div.onclick = () => {
+      if (isPlaying) return; // blockieren, solange Audio läuft
+
+      // Sofortiger Klick-Sound
+      new Audio("click.mp3").play();
+
+      // Wort-Audio starten
       const audio = new Audio(word + ".mp3");
+      isPlaying = true;
       audio.play();
+
+      // Nach Ende wieder freigeben
+      audio.onended = () => {
+        isPlaying = false;
+      };
     };
   });
 </script>
 
 </body>
-
 </html>
