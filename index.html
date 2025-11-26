@@ -8,7 +8,7 @@
       background-color: #fff8e7;
       margin: 0;
       padding: 20px;
-      min-height: 100vh; /* statt height */
+      min-height: 100vh;
       width: 100vw;
       position: relative;
       overflow: hidden;
@@ -36,15 +36,18 @@
       opacity: 0.4;
       margin-left: 8px;
     }
+    /* Button unten links */
     #shuffleBtn {
-      display: block;
-      margin: 0 auto 20px auto;
+      position: fixed;
+      bottom: 60px;
+      left: 20px;
       padding: 10px 20px;
       font-size: 18px;
       background-color: #e0c080;
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
     }
     #shuffleBtn:hover {
       background-color: #d0a060;
@@ -56,6 +59,10 @@
       right: 10px;
       height: 70px;
       max-width: 120px;
+      background: #fff;
+      padding: 4px;
+      border-radius: 6px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.3);
     }
     /* Fußzeile */
     footer {
@@ -72,20 +79,28 @@
       bottom: 5px;
       right: 10px;
       font-size: 12px;
-      color: #555;
+      color: #222;
+      background: rgba(255,255,255,0.8);
+      padding: 2px 6px;
+      border-radius: 4px;
     }
     /* Mobile Anpassung */
     @media (max-width: 600px) {
       .copyright {
-        font-size: 10px;
-        color: #999;
+        font-size: 13px;
+        color: #000;
+        background: #fff;
       }
       footer {
         font-size: 16px;
       }
       #logo {
-        height: 50px;
-        max-width: 90px;
+        height: 80px;   /* etwas größer auf Handy */
+        max-width: 140px;
+      }
+      #shuffleBtn {
+        font-size: 16px;
+        padding: 8px 16px;
       }
     }
   </style>
@@ -94,6 +109,8 @@
 
   <h1>Goddelsheims Platt</h1>
   <h2>- schimpfen und charakterisieren -</h2>
+
+  <!-- Button unten links -->
   <button id="shuffleBtn">Neu mischen</button>
 
   <!-- Logo -->
@@ -138,7 +155,7 @@
   function placeTerms() {
     placed.length = 0;
     const topMargin = 160;
-    const bottomMargin = 140; // mehr Platz für Fußzeile
+    const bottomMargin = 140;
 
     document.querySelectorAll(".term").forEach(div => {
       const rect = div.getBoundingClientRect();
