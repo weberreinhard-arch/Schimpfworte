@@ -8,10 +8,11 @@
       background-color: #fff8e7;
       margin: 0;
       padding: 20px;
-      height: 100vh;
+      min-height: 100vh; /* statt height */
       width: 100vw;
       position: relative;
       overflow: hidden;
+      font-family: sans-serif;
     }
     h1 {
       font-size: 48px;
@@ -23,16 +24,69 @@
       font-size: 28px;
       font-weight: normal;
       text-align: center;
-      margin: 5px 0 40px 0;
+      margin: 5px 0 20px 0;
     }
     .term {
       position: absolute;
-      cursor: pointer; /* Hand-Cursor */
+      cursor: pointer;
       white-space: nowrap;
+      transition: transform 0.2s ease, color 0.2s ease;
     }
     .translation {
       opacity: 0.4;
       margin-left: 8px;
+    }
+    #shuffleBtn {
+      display: block;
+      margin: 0 auto 20px auto;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #e0c080;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #shuffleBtn:hover {
+      background-color: #d0a060;
+    }
+    /* Logo oben rechts */
+    #logo {
+      position: fixed;
+      top: 20px;
+      right: 10px;
+      height: 70px;
+      max-width: 120px;
+    }
+    /* Fußzeile */
+    footer {
+      position: fixed;
+      bottom: 25px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .copyright {
+      position: fixed;
+      bottom: 5px;
+      right: 10px;
+      font-size: 12px;
+      color: #555;
+    }
+    /* Mobile Anpassung */
+    @media (max-width: 600px) {
+      .copyright {
+        font-size: 10px;
+        color: #999;
+      }
+      footer {
+        font-size: 16px;
+      }
+      #logo {
+        height: 50px;
+        max-width: 90px;
+      }
     }
   </style>
 </head>
@@ -40,6 +94,14 @@
 
   <h1>Goddelsheims Platt</h1>
   <h2>- schimpfen und charakterisieren -</h2>
+  <button id="shuffleBtn">Neu mischen</button>
+
+  <!-- Logo -->
+  <img id="logo" src="logo.jpg" alt="Logo">
+
+  <!-- Fußzeile -->
+  <footer>Klicken und hören!</footer>
+  <div class="copyright">copyright Kultuverein Goddelsheim</div>
 
 <script>
   const terms = [
@@ -67,59 +129,82 @@
   const colors = ["darkred","blue","green","purple","darkorange","brown","teal","crimson","navy","darkgreen","indigo","darkblue","maroon","olive","darkcyan","darkmagenta","darkslateblue","firebrick"];
 
   const placed = [];
-  let isPlaying = false; // Sperr-Flag
+  let isPlaying = false;
 
   function overlaps(x,y,w,h) {
     return placed.some(p => !(x+w < p.x || p.x+p.w < x || y+h < p.y || p.y+p.h < y));
   }
 
+  function placeTerms() {
+    placed.length = 0;
+    const topMargin = 160;
+    const bottomMargin = 140; // mehr Platz für Fußzeile
+
+    document.querySelectorAll(".term").forEach(div => {
+      const rect = div.getBoundingClientRect();
+      let w = rect.width;
+      let h = rect.height;
+
+      let x,y,tries=0;
+      do {
+        x = Math.random()*(window.innerWidth - w);
+        y = topMargin + Math.random()*(window.innerHeight - h - topMargin - bottomMargin);
+        tries++;
+        if (tries>1000) break;
+      } while(overlaps(x,y,w,h));
+
+      div.style.left = x + "px";
+      div.style.top = y + "px";
+      placed.push({x,y,w,h});
+    });
+  }
+
+  // Begriffe erzeugen
   terms.forEach(([word,translation]) => {
     const div = document.createElement("div");
     div.className = "term";
 
-    const baseSize = 20 + Math.random()*12;
+    const baseSize = (window.innerWidth < 600 ? 16 : 20) + Math.random()*12;
     div.style.fontSize = (baseSize*1.2) + "px";
     div.style.fontFamily = fonts[Math.floor(Math.random()*fonts.length)];
     div.style.color = colors[Math.floor(Math.random()*colors.length)];
     div.innerHTML = word + "<span class='translation'>" + translation + "</span>";
     document.body.appendChild(div);
 
-    const rect = div.getBoundingClientRect();
-    let w = rect.width;
-    let h = rect.height;
-
-    let x,y,tries=0;
-    const topMargin = 140;
-    const bottomMargin = 100;
-    do {
-      x = Math.random()*(window.innerWidth - w);
-      y = topMargin + Math.random()*(window.innerHeight - h - topMargin - bottomMargin);
-      tries++;
-      if (tries>1000) break;
-    } while(overlaps(x,y,w,h));
-
-    div.style.left = x + "px";
-    div.style.top = y + "px";
-    placed.push({x,y,w,h});
-
-    // Klick-Aktion
-    div.onclick = () => {
-      if (isPlaying) return; // blockieren, solange Audio läuft
-
-      // Sofortiger Klick-Sound
+    const playAudio = () => {
+      if (isPlaying) return;
       new Audio("click.mp3").play();
-
-      // Wort-Audio starten
       const audio = new Audio(word + ".mp3");
       isPlaying = true;
       audio.play();
 
-      // Nach Ende wieder freigeben
-      audio.onended = () => {
-        isPlaying = false;
-      };
+      // kleine Animation
+      div.style.transform = "scale(1.3)";
+      div.style.color = "gold";
+      setTimeout(() => {
+        div.style.transform = "scale(1)";
+        div.style.color = colors[Math.floor(Math.random()*colors.length)];
+      }, 300);
+
+      audio.onended = () => { isPlaying = false; };
     };
+
+    div.onclick = playAudio;
+    div.ontouchstart = playAudio;
   });
+
+  // Initial platzieren
+  placeTerms();
+
+  // Neu platzieren bei Fensteränderung
+  window.addEventListener("resize", () => {
+    placeTerms();
+  });
+
+  // Button zum Neu mischen
+  document.getElementById("shuffleBtn").onclick = () => {
+    placeTerms();
+  };
 </script>
 
 </body>
