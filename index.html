@@ -2,15 +2,18 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Begriffe</title>
   <style>
     body {
       background-color: #fff8e7;
       margin: 0;
-      padding: 20px;
-      min-height: 100vh;
-      width: 100vw;
+      padding: 0;
+      height: 100vh;
+      width: 100%;
       font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
     }
     h1 {
       font-size: 48px;
@@ -25,13 +28,13 @@
       margin: 5px 0 10px 0;
     }
     #termsContainer {
+      flex: 1;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-around;
       align-content: flex-start;
-      margin-top: 20px;
-      margin-bottom: 80px;
-      min-height: calc(100vh - 200px); /* flexibler statt fix */
+      padding: 20px;
+      overflow-y: auto;
     }
     .term {
       flex: 1 0 200px;
@@ -40,30 +43,18 @@
       transition: transform 0.2s ease, color 0.2s ease;
       position: relative;
       line-height: 1.5;
-      /* white-space: nowrap; entfernt */
     }
     .translation {
       opacity: 0.6;
       margin-left: 8px;
       font-size: 0.7em;
     }
-    #shuffleBtn {
-      position: fixed;
-      bottom: 10px;
-      left: 20px;
-      padding: 10px 20px;
-      font-size: 18px;
-      background-color: #e0c080;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
-    }
-    #shuffleBtn:hover { background-color: #d0a060; }
+
+    /* Logo oben rechts */
     #logo {
-      position: fixed;
+      position: absolute;
       top: 20px;
-      right: 10px;
+      right: 20px;
       height: 70px;
       max-width: 120px;
       background: #fff;
@@ -71,47 +62,47 @@
       border-radius: 6px;
       box-shadow: 0 0 6px rgba(0,0,0,0.3);
     }
+
+    /* Fußzeile */
     footer {
-      position: fixed;
-      bottom: 40px;
-      left: 0;
-      width: 100%;
-      text-align: center;
-      font-size: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.9);
+      font-size: 16px;
       font-weight: bold;
     }
+    #shuffleBtn {
+      font-size: 16px;
+      background-color: #e0c080;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 8px 16px;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+    }
+    #shuffleBtn:hover { background-color: #d0a060; }
     .copyright {
-      position: fixed;
-      bottom: 5px;
-      right: 10px;
       font-size: 12px;
       color: #222;
-      background: rgba(255,255,255,0.8);
-      padding: 2px 6px;
-      border-radius: 4px;
     }
 
     /* Handy */
     @media (max-width: 600px) {
       .term {
-        font-size: 20px;       /* Mindestgröße */
-        white-space: normal;   /* Umbruch erlauben */
+        font-size: 20px;
+        white-space: normal;
         flex: 1 0 140px;
       }
-      #termsContainer {
-        min-height: auto;
-        justify-content: center;
-      }
-      footer { font-size: 16px; }
-      #logo { height: 80px; max-width: 140px; }
-      #shuffleBtn { font-size: 16px; padding: 8px 16px; }
-      .copyright { font-size: 13px; color: #000; background: #fff; }
+      #logo { height: 60px; max-width: 100px; }
+      #shuffleBtn { font-size: 14px; padding: 6px 12px; }
     }
 
     /* Tablet */
     @media (min-width: 601px) and (max-width: 1024px) {
       .term { font-size: 22px; }
-      #logo { height: 90px; max-width: 160px; }
+      #logo { height: 80px; max-width: 140px; }
     }
   </style>
 </head>
@@ -120,13 +111,15 @@
   <h1>Goddelsheims Platt</h1>
   <h2>- schimpfen und charakterisieren -</h2>
 
-  <button id="shuffleBtn">Neu mischen</button>
   <img id="logo" src="logo.jpg" alt="Logo">
 
-  <footer>Klicken und hören!</footer>
-  <div class="copyright">© Kulturverein Goddelsheim</div>
-
   <div id="termsContainer"></div>
+
+  <footer>
+    <button id="shuffleBtn">Neu mischen</button>
+    <div>Klicken und hören!</div>
+    <div class="copyright">© Kulturverein Goddelsheim</div>
+  </footer>
 
 <script>
   const terms = [
