@@ -31,7 +31,7 @@
       align-content: flex-start;
       margin-top: 20px;
       margin-bottom: 80px;
-      height: calc(100vh - 200px);
+      min-height: calc(100vh - 200px); /* flexibler statt fix */
     }
     .term {
       flex: 1 0 200px;
@@ -39,13 +39,13 @@
       cursor: pointer;
       transition: transform 0.2s ease, color 0.2s ease;
       position: relative;
-      line-height: 1.5;    /* moderater Zeilenabstand */
-      white-space: nowrap; /* kein Umbruch */
+      line-height: 1.5;
+      /* white-space: nowrap; entfernt */
     }
     .translation {
       opacity: 0.6;
       margin-left: 8px;
-      font-size: 0.7em; /* deutlich kleiner als der Hauptbegriff */
+      font-size: 0.7em;
     }
     #shuffleBtn {
       position: fixed;
@@ -90,12 +90,25 @@
       padding: 2px 6px;
       border-radius: 4px;
     }
+
+    /* Handy */
     @media (max-width: 600px) {
-      .copyright { font-size: 13px; color: #000; background: #fff; }
+      .term {
+        font-size: 20px;       /* Mindestgröße */
+        white-space: normal;   /* Umbruch erlauben */
+        flex: 1 0 140px;
+      }
+      #termsContainer {
+        min-height: auto;
+        justify-content: center;
+      }
       footer { font-size: 16px; }
       #logo { height: 80px; max-width: 140px; }
       #shuffleBtn { font-size: 16px; padding: 8px 16px; }
+      .copyright { font-size: 13px; color: #000; background: #fff; }
     }
+
+    /* Tablet */
     @media (min-width: 601px) and (max-width: 1024px) {
       .term { font-size: 22px; }
       #logo { height: 90px; max-width: 160px; }
@@ -159,13 +172,15 @@
       const div = document.createElement("div");
       div.className = "term";
 
-      const baseSize = Math.max(14, window.innerWidth / 50) + Math.random()*8;
+      const baseSize = Math.max(
+        window.innerWidth < 600 ? 18 : 14,
+        window.innerWidth / 50
+      ) + Math.random()*8;
       div.style.fontSize = baseSize + "px";
       div.style.fontFamily = fonts[Math.floor(Math.random()*fonts.length)];
       div.style.color = colors[Math.floor(Math.random()*colors.length)];
       div.innerHTML = word + "<span class='translation'>" + translation + "</span>";
 
-      // kleine zufällige Verschiebung
       const dx = Math.random()*20 - 10;
       const dy = Math.random()*20 - 10;
       div.style.transform = `translate(${dx}px, ${dy}px)`;
