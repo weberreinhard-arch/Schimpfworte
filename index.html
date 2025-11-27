@@ -10,8 +10,6 @@
       padding: 20px;
       min-height: 100vh;
       width: 100vw;
-      position: relative;
-      overflow: hidden;
       font-family: sans-serif;
     }
     h1 {
@@ -24,22 +22,34 @@
       font-size: 28px;
       font-weight: normal;
       text-align: center;
-      margin: 5px 0 20px 0;
+      margin: 5px 0 10px 0;
+    }
+    #termsContainer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      align-content: flex-start;
+      margin-top: 20px;
+      margin-bottom: 80px;
+      height: calc(100vh - 200px);
     }
     .term {
-      position: absolute;
+      flex: 1 0 200px;
+      margin: 10px;
       cursor: pointer;
-      white-space: nowrap;
       transition: transform 0.2s ease, color 0.2s ease;
+      position: relative;
+      line-height: 1.5;    /* moderater Zeilenabstand */
+      white-space: nowrap; /* kein Umbruch */
     }
     .translation {
-      opacity: 0.4;
+      opacity: 0.6;
       margin-left: 8px;
+      font-size: 0.7em; /* deutlich kleiner als der Hauptbegriff */
     }
-    /* Button unten links */
     #shuffleBtn {
       position: fixed;
-      bottom: 60px;
+      bottom: 10px;
       left: 20px;
       padding: 10px 20px;
       font-size: 18px;
@@ -49,10 +59,7 @@
       cursor: pointer;
       box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
     }
-    #shuffleBtn:hover {
-      background-color: #d0a060;
-    }
-    /* Logo oben rechts */
+    #shuffleBtn:hover { background-color: #d0a060; }
     #logo {
       position: fixed;
       top: 20px;
@@ -64,10 +71,9 @@
       border-radius: 6px;
       box-shadow: 0 0 6px rgba(0,0,0,0.3);
     }
-    /* Fußzeile */
     footer {
       position: fixed;
-      bottom: 25px;
+      bottom: 40px;
       left: 0;
       width: 100%;
       text-align: center;
@@ -84,24 +90,15 @@
       padding: 2px 6px;
       border-radius: 4px;
     }
-    /* Mobile Anpassung */
     @media (max-width: 600px) {
-      .copyright {
-        font-size: 13px;
-        color: #000;
-        background: #fff;
-      }
-      footer {
-        font-size: 16px;
-      }
-      #logo {
-        height: 80px;   /* etwas größer auf Handy */
-        max-width: 140px;
-      }
-      #shuffleBtn {
-        font-size: 16px;
-        padding: 8px 16px;
-      }
+      .copyright { font-size: 13px; color: #000; background: #fff; }
+      footer { font-size: 16px; }
+      #logo { height: 80px; max-width: 140px; }
+      #shuffleBtn { font-size: 16px; padding: 8px 16px; }
+    }
+    @media (min-width: 601px) and (max-width: 1024px) {
+      .term { font-size: 22px; }
+      #logo { height: 90px; max-width: 160px; }
     }
   </style>
 </head>
@@ -110,15 +107,13 @@
   <h1>Goddelsheims Platt</h1>
   <h2>- schimpfen und charakterisieren -</h2>
 
-  <!-- Button unten links -->
   <button id="shuffleBtn">Neu mischen</button>
-
-  <!-- Logo -->
   <img id="logo" src="logo.jpg" alt="Logo">
 
-  <!-- Fußzeile -->
   <footer>Klicken und hören!</footer>
-  <div class="copyright">copyright Kultuverein Goddelsheim</div>
+  <div class="copyright">© Kulturverein Goddelsheim</div>
+
+  <div id="termsContainer"></div>
 
 <script>
   const terms = [
@@ -145,83 +140,69 @@
   const fonts = ["Arial","Courier New","Georgia","Verdana","Times New Roman","Tahoma","Impact","Comic Sans MS","Helvetica"];
   const colors = ["darkred","blue","green","purple","darkorange","brown","teal","crimson","navy","darkgreen","indigo","darkblue","maroon","olive","darkcyan","darkmagenta","darkslateblue","firebrick"];
 
-  const placed = [];
   let isPlaying = false;
 
-  function overlaps(x,y,w,h) {
-    return placed.some(p => !(x+w < p.x || p.x+p.w < x || y+h < p.y || p.y+p.h < y));
+  function shuffleArray(arr) {
+    return arr
+      .map(value => ({ value, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ value }) => value);
   }
 
-  function placeTerms() {
-    placed.length = 0;
-    const topMargin = 160;
-    const bottomMargin = 140;
+  function createTerms() {
+    const container = document.getElementById("termsContainer");
+    container.innerHTML = "";
 
-    document.querySelectorAll(".term").forEach(div => {
-      const rect = div.getBoundingClientRect();
-      let w = rect.width;
-      let h = rect.height;
+    const shuffled = shuffleArray(terms);
 
-      let x,y,tries=0;
-      do {
-        x = Math.random()*(window.innerWidth - w);
-        y = topMargin + Math.random()*(window.innerHeight - h - topMargin - bottomMargin);
-        tries++;
-        if (tries>1000) break;
-      } while(overlaps(x,y,w,h));
+    shuffled.forEach(([word,translation]) => {
+      const div = document.createElement("div");
+      div.className = "term";
 
-      div.style.left = x + "px";
-      div.style.top = y + "px";
-      placed.push({x,y,w,h});
+      const baseSize = Math.max(14, window.innerWidth / 50) + Math.random()*8;
+      div.style.fontSize = baseSize + "px";
+      div.style.fontFamily = fonts[Math.floor(Math.random()*fonts.length)];
+      div.style.color = colors[Math.floor(Math.random()*colors.length)];
+      div.innerHTML = word + "<span class='translation'>" + translation + "</span>";
+
+      // kleine zufällige Verschiebung
+      const dx = Math.random()*20 - 10;
+      const dy = Math.random()*20 - 10;
+      div.style.transform = `translate(${dx}px, ${dy}px)`;
+
+      const playAudio = () => {
+        if (isPlaying) return;
+        new Audio("click.mp3").play();
+        const audio = new Audio(word + ".mp3");
+        isPlaying = true;
+        audio.play();
+
+        div.style.transform += " scale(1.3)";
+        div.style.color = "gold";
+        setTimeout(() => {
+          div.style.transform = `translate(${dx}px, ${dy}px) scale(1)`;
+          div.style.color = colors[Math.floor(Math.random()*colors.length)];
+        }, 300);
+
+        audio.onended = () => { isPlaying = false; };
+      };
+
+      div.onclick = playAudio;
+      div.ontouchstart = playAudio;
+
+      container.appendChild(div);
     });
   }
 
-  // Begriffe erzeugen
-  terms.forEach(([word,translation]) => {
-    const div = document.createElement("div");
-    div.className = "term";
+  createTerms();
 
-    const baseSize = (window.innerWidth < 600 ? 16 : 20) + Math.random()*12;
-    div.style.fontSize = (baseSize*1.2) + "px";
-    div.style.fontFamily = fonts[Math.floor(Math.random()*fonts.length)];
-    div.style.color = colors[Math.floor(Math.random()*colors.length)];
-    div.innerHTML = word + "<span class='translation'>" + translation + "</span>";
-    document.body.appendChild(div);
-
-    const playAudio = () => {
-      if (isPlaying) return;
-      new Audio("click.mp3").play();
-      const audio = new Audio(word + ".mp3");
-      isPlaying = true;
-      audio.play();
-
-      // kleine Animation
-      div.style.transform = "scale(1.3)";
-      div.style.color = "gold";
-      setTimeout(() => {
-        div.style.transform = "scale(1)";
-        div.style.color = colors[Math.floor(Math.random()*colors.length)];
-      }, 300);
-
-      audio.onended = () => { isPlaying = false; };
-    };
-
-    div.onclick = playAudio;
-    div.ontouchstart = playAudio;
-  });
-
-  // Initial platzieren
-  placeTerms();
-
-  // Neu platzieren bei Fensteränderung
-  window.addEventListener("resize", () => {
-    placeTerms();
-  });
-
-  // Button zum Neu mischen
   document.getElementById("shuffleBtn").onclick = () => {
-    placeTerms();
+    createTerms();
   };
+
+  window.addEventListener("resize", () => {
+    createTerms();
+  });
 </script>
 
 </body>
